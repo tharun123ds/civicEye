@@ -47,7 +47,7 @@ export default function UserDashboard({ token, onLogout }: UserDashboardProps) {
     setError("");
 
     try {
-      const res = await fetch("http://localhost:5000/api/issues", {
+      const res = await fetch("http://13.204.65.29:5006/api/issues", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -81,7 +81,7 @@ export default function UserDashboard({ token, onLogout }: UserDashboardProps) {
       formData.append("location", form.location);
       if (form.photo) formData.append("photo", form.photo);
 
-      const res = await fetch("http://localhost:5000/api/issues", {
+      const res = await fetch("http://13.204.65.29:5006/api/issues", {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
         body: formData,
@@ -142,7 +142,7 @@ export default function UserDashboard({ token, onLogout }: UserDashboardProps) {
         {issue.photo && (
           <div className="relative">
             <img
-              src={`http://localhost:5000${issue.photo}`}
+              src={`http://13.204.65.29:5006${issue.photo}`}
               alt="Issue"
               className="w-full h-48 object-cover rounded-md"
             />

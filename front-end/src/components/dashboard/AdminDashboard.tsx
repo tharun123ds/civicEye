@@ -41,7 +41,7 @@ export default function AdminDashboard({
     setLoading(true);
     setError("");
     try {
-      const res = await fetch("http://localhost:5000/api/issues", {
+      const res = await fetch("http://13.204.65.29:5006/api/issues", {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -65,7 +65,7 @@ export default function AdminDashboard({
     setUpdatingId(id);
     setError("");
     try {
-      const res = await fetch(`http://localhost:5000/api/issues/${id}`, {
+      const res = await fetch(`http://13.204.65.29:5006/api/issues/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -146,7 +146,7 @@ export default function AdminDashboard({
         {issue.photo && (
           <div className="relative z-0">
             <img
-              src={`http://localhost:5000${issue.photo}`}
+              src={`http://13.204.65.29:5006${issue.photo}`}
               alt="Issue"
               className="w-full h-48 object-cover rounded-md z-0"
             />
