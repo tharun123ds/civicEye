@@ -12,6 +12,7 @@ import {
   Clock,
   Camera,
   Shield,
+  Trash2,
 } from "lucide-react";
 
 interface Issue {
@@ -35,6 +36,7 @@ export default function AdminDashboard({
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(false);
   const [updatingId, setUpdatingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState("");
 
   const fetchIssues = useCallback(async () => {
@@ -84,6 +86,31 @@ export default function AdminDashboard({
       setError("Server error while updating status");
     }
     setUpdatingId(null);
+  };
+
+  const deleteIssue = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this issue?")) return;
+
+    setDeletingId(id);
+    setError("");
+    try {
+      const res = await fetch(`http://13.204.65.29:5006/api/issues/${id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        setError(data.message || "Failed to delete issue");
+      } else {
+        await fetchIssues();
+      }
+    } catch {
+      setError("Server error while deleting issue");
+    }
+    setDeletingId(null);
   };
 
   const getStatusVariant = (status: string) => {
@@ -159,7 +186,7 @@ export default function AdminDashboard({
         <div className="flex gap-2 pt-2 z-10 relative">
           <Button
             onClick={() => updateStatus(issue._id, "Resolved")}
-            disabled={updatingId === issue._id}
+            disabled={updatingId === issue._id || deletingId === issue._id}
             variant="default"
             size="sm"
             className="flex-1 cursor-pointer"
@@ -174,7 +201,7 @@ export default function AdminDashboard({
 
           <Button
             onClick={() => updateStatus(issue._id, "Pending")}
-            disabled={updatingId === issue._id}
+            disabled={updatingId === issue._id || deletingId === issue._id}
             variant="secondary"
             size="sm"
             className="flex-1 cursor-pointer"
@@ -185,6 +212,21 @@ export default function AdminDashboard({
               <Clock className="mr-2 h-4 w-4" />
             )}
             Mark Pending
+          </Button>
+
+          <Button
+            onClick={() => deleteIssue(issue._id)}
+            disabled={updatingId === issue._id || deletingId === issue._id}
+            variant="destructive"
+            size="sm"
+            className="flex-1 cursor-pointer flex items-center justify-center gap-2"
+          >
+            {deletingId === issue._id ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <Trash2 className="mr-2 h-4 w-4" />
+            )}
+            Delete
           </Button>
         </div>
       </CardContent>

@@ -13,7 +13,14 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, LogOut, MapPin, FileText, Camera } from "lucide-react";
+import {
+  Loader2,
+  LogOut,
+  MapPin,
+  FileText,
+  Camera,
+  Trash2,
+} from "lucide-react";
 
 interface Issue {
   _id: string;
@@ -41,6 +48,7 @@ export default function UserDashboard({ token, onLogout }: UserDashboardProps) {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [deletingIds, setDeletingIds] = useState<string[]>([]); // Track deleting issue IDs
 
   const fetchIssues = useCallback(async () => {
     setLoading(true);
@@ -103,6 +111,30 @@ export default function UserDashboard({ token, onLogout }: UserDashboardProps) {
     setSubmitting(false);
   };
 
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this issue?")) return;
+
+    try {
+      setDeletingIds((prev) => [...prev, id]);
+
+      const res = await fetch(`http://13.204.65.29:5006/api/issues/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (res.ok) {
+        setIssues((prev) => prev.filter((issue) => issue._id !== id));
+      } else {
+        const data = await res.json();
+        setError(data.message || "Failed to delete issue");
+      }
+    } catch {
+      setError("Server error while deleting issue");
+    } finally {
+      setDeletingIds((prev) => prev.filter((issueId) => issueId !== id));
+    }
+  };
+
   const getStatusVariant = (status: string) => {
     switch (status?.toLowerCase()) {
       case "resolved":
@@ -151,6 +183,23 @@ export default function UserDashboard({ token, onLogout }: UserDashboardProps) {
             </div>
           </div>
         )}
+
+        <Button
+          variant="destructive"
+          size="sm"
+          className="mt-2"
+          onClick={() => handleDelete(issue._id)}
+          disabled={deletingIds.includes(issue._id)}
+        >
+          {deletingIds.includes(issue._id) ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <>
+              <Trash2 className="mr-1 h-4 w-4" />
+              Delete
+            </>
+          )}
+        </Button>
       </CardContent>
     </Card>
   );

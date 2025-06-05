@@ -33,4 +33,22 @@ router.patch('/:id', async (req, res) => {
     res.json(issue);
 });
 
+// DELETE endpoint to delete an issue
+router.delete('/:id', async (req, res) => {
+    try {
+        const issue = await Issue.findById(req.params.id);
+        if (!issue) return res.status(404).json({ message: 'Issue not found' });
+
+        // Allow delete if admin or owner of the issue
+        if (req.user.role !== 'admin' && !issue.createdBy.equals(req.user._id)) {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        await issue.remove();
+        res.json({ message: 'Issue deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;
