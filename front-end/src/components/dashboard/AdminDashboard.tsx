@@ -107,7 +107,8 @@ export default function AdminDashboard({
       } else {
         await fetchIssues();
       }
-    } catch {
+    } catch (e) {
+      console.log(e);
       setError("Server error while deleting issue");
     }
     setDeletingId(null);
